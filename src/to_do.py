@@ -39,10 +39,11 @@ class SimpleStore:
 
     def __init__(self, path: Path | str = DEFAULT_DATA):
         self.path = Path(path)
-        self.tasks: list[dict] = []
-        self.trash: list[dict] = []
+        self.tasks: list[dict] = [] #instancia a lista de tarefas
+        self.trash: list[dict] = [] #instancia a lista da lixeira
         self.load()
 
+    #Função para carregar os dados
     def load(self) -> None:
         if not self.path.exists():
             self.tasks = []
@@ -179,18 +180,18 @@ class ToDoApp(QWidget):
             pass
 
         # conexões
-        self.add_button.clicked.connect(self.handle_add)
-        self.task_input.returnPressed.connect(self.handle_add)
+        self.add_button.clicked.connect(self.lida_adicao)
+        self.task_input.returnPressed.connect(self.lida_adicao)
         self.delete_button.clicked.connect(self.handle_delete)
         self.complete_button.clicked.connect(self.handle_complete)
         self.trash_button.clicked.connect(self.show_trash)
         self.clear_button.clicked.connect(self.handle_clear)
         self.task_list.itemDoubleClicked.connect(self.handle_toggle)
         # itemChanged será usado para escutar mudanças nos checkboxes
-        self.task_list.itemChanged.connect(self.handle_item_changed)
+        self.task_list.itemChanged.connect(self.lida_item_alterado)
         # flag para evitar loops quando atualizamos programaticamente os itens
         self._suspend_item_change = False
-        self.task_list.currentItemChanged.connect(lambda cur, prev: self.update_action_buttons())
+        self.task_list.currentItemChanged.connect(lambda cur, prev: self.atualizar_botoes_de_acao())
         self.apply_styles()
         self.refresh()
 
@@ -226,7 +227,7 @@ class ToDoApp(QWidget):
             self.task_list.addItem(item)
         self._suspend_item_change = False
 
-    def handle_add(self):
+    def lida_adicao(self):
         title = self.task_input.text().strip()
         if not title:
             return
@@ -266,7 +267,7 @@ class ToDoApp(QWidget):
         self.store.set_all(any_undone)
         self.refresh()
 
-    def update_action_buttons(self):
+    def atualizar_botoes_de_acao(self):
         # O botão "Selecionar tudo" atua globalmente — habilita se houver tarefas
         try:
             self.complete_button.setText("Selecionar tudo")
@@ -281,7 +282,7 @@ class ToDoApp(QWidget):
         self.store.toggle(tid)
         self.refresh()
 
-    def handle_item_changed(self, item: QListWidgetItem) -> None:
+    def lida_item_alterado(self, item: QListWidgetItem) -> None:
         """Chamado quando o checkbox do item muda (usuário interage).
 
         Evitamos loops com a flag _suspend_item_change.
