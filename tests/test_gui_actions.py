@@ -2,7 +2,7 @@ import pytest
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtCore import Qt
 
-from to_do import ToDoApp, SimpleStore
+from src.todoList import ToDoApp, SimpleStore
 
 
 def _make_app(qtbot, tmp_path=None):

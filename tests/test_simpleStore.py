@@ -1,7 +1,7 @@
 import json
 import tempfile
 from pathlib import Path
-from to_do import SimpleStore
+from src.todoList import SimpleStore
 
 
 def test_criacao_de_tarefa():

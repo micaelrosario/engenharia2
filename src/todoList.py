@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QPixmap, QBrush, QFont
 from PyQt5.QtCore import Qt, QSize
 
-from style import (
+from src.style import (
     estilo_botoes,
     paleta_escura,
     apply_app_style,

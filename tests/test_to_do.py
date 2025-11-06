@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from to_do import SimpleStore
+from src.todoList import SimpleStore
 
 
 def teste_adicionar_e_persistir(tmp_path: Path):
