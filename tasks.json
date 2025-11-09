@@ -1,0 +1,10 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Teste de tarefa",
+      "done": false
+    }
+  ],
+  "trash": []
+}

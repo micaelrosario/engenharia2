@@ -1,54 +1,70 @@
 import json
-import tempfile
-from pathlib import Path
-from src.todoList import SimpleStore
+from src.todoList import ArmazenamentoSimples
 
 
-def test_criacao_de_tarefa():
-    """Testa se uma tarefa é criada corretamente e salva no arquivo JSON."""
-    with tempfile.TemporaryDirectory() as tmp:
-        data_path = Path(tmp) / "tasks.json"
-        store = SimpleStore(data_path)
-        
-        tarefa = store.add("Estudar PyQt5")
-        
-        # Verifica se o ID e título foram gerados corretamente
-        assert tarefa["id"] == 1
-        assert tarefa["title"] == "Estudar PyQt5"
-        assert tarefa["done"] is False
-        
-        # Verifica se foi salva no arquivo
-        with open(data_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        assert len(data["tasks"]) == 1
-        assert data["tasks"][0]["title"] == "Estudar PyQt5"
+# ----------------------------
+# Testes da classe ArmazenamentoSimples
+# ----------------------------
+
+def test_inicia_vazio_quando_arquivo_nao_existe(tmp_path):
+    """Verifica se o armazenamento inicia vazio quando o arquivo não existe."""
+    caminho = tmp_path / "tarefas.json"
+    store = ArmazenamentoSimples(caminho)
+    assert store.tarefas == []
 
 
-def test_criacao_varias_tarefas_ids_incrementais():
-    """Verifica se múltiplas tarefas recebem IDs únicos e incrementais."""
-    with tempfile.TemporaryDirectory() as tmp:
-        store = SimpleStore(Path(tmp) / "tasks.json")
-        
-        t1 = store.add("Tarefa 1")
-        t2 = store.add("Tarefa 2")
-        t3 = store.add("Tarefa 3")
+def test_adiciona_tarefa_e_salva(tmp_path):
+    """Testa se adicionar() cria uma nova tarefa e salva corretamente."""
+    caminho = tmp_path / "tarefas.json"
+    store = ArmazenamentoSimples(caminho)
+    store.adicionar("Comprar pão")
+    
+    assert len(store.tarefas) == 1
+    tarefa = store.tarefas[0]
+    assert tarefa["titulo"] == "Comprar pão"
+    assert not tarefa["feito"]
 
-        assert t1["id"] == 1
-        assert t2["id"] == 2
-        assert t3["id"] == 3
-        assert len(store.tasks) == 3
+    # Verifica se salvou no arquivo
+    dados = json.loads(caminho.read_text(encoding="utf-8"))
+    assert dados[0]["titulo"] == "Comprar pão"
 
 
-def test_salvamento_e_recuperacao_do_arquivo():
-    """Garante que os dados persistem entre execuções."""
-    with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / "tasks.json"
-        
-        store1 = SimpleStore(path)
-        store1.add("Tarefa Persistente")
-        store1.save()
-        
-        # Nova instância deve carregar o mesmo dado
-        store2 = SimpleStore(path)
-        assert len(store2.tasks) == 1
-        assert store2.tasks[0]["title"] == "Tarefa Persistente"
+def test_remove_tarefa_da_lista(tmp_path):
+    """Testa se remover() realmente exclui uma tarefa existente."""
+    caminho = tmp_path / "tarefas.json"
+    store = ArmazenamentoSimples(caminho)
+    store.adicionar("Estudar Python")
+    
+    assert len(store.tarefas) == 1
+    store.remover(0)
+    assert store.tarefas == []
+
+
+def test_alternar_status_marca_e_desmarca(tmp_path):
+    """Verifica se alternar_status() muda o estado 'feito' corretamente."""
+    caminho = tmp_path / "tarefas.json"
+    store = ArmazenamentoSimples(caminho)
+    store.adicionar("Fazer exercícios")
+    
+    assert not store.tarefas[0]["feito"]
+    store.alternar_status(0)
+    assert store.tarefas[0]["feito"]
+    store.alternar_status(0)
+    assert not store.tarefas[0]["feito"]
+
+
+def test_salvar_e_carregar(tmp_path):
+    """Verifica se salvar() e carregar() funcionam corretamente."""
+    caminho = tmp_path / "tarefas.json"
+    store = ArmazenamentoSimples(caminho)
+    store.adicionar("Ler um livro")
+
+    # Verifica que o arquivo foi criado
+    assert caminho.exists()
+
+    # Cria nova instância e carrega do arquivo
+    novo_store = ArmazenamentoSimples(caminho)
+    assert len(novo_store.tarefas) == 1
+    assert novo_store.tarefas[0]["titulo"] == "Ler um livro"
+    assert not novo_store.tarefas[0]["feito"]
+
