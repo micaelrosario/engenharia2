@@ -1,4 +1,4 @@
-# To‑Do List (versão melhorada)
+# To‑Do List 
 
 Este repositório contém uma aplicação To‑Do em Python com interface gráfica (PyQt5),
 persistência simples em JSON e uma suíte de testes mínimas com pytest. O objetivo foi
