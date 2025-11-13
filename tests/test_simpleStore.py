@@ -1,5 +1,6 @@
 import json
-from src.todoList import ArmazenamentoSimples
+from src.todoList import ArmazenamentoSimples, AplicativoTarefas
+
 
 
 def test_inicia_vazio_quando_arquivo_nao_existe(tmp_path):
@@ -55,3 +56,18 @@ def test_salvar_e_carregar(tmp_path):
 
     novo_store = ArmazenamentoSimples(caminho)
     assert novo_store.tarefas == [{"titulo": "Ler um livro", "feito": False}]
+
+def test_carrega_arquivo_json_invalido(tmp_path):
+    caminho = tmp_path / "tarefas.json"
+    caminho.write_text("{invalido_json}", encoding="utf-8")
+    store = ArmazenamentoSimples(caminho)
+    assert store.tarefas == []  # deve recomeçar vazio
+
+def test_salvar_em_diretorio_invalido(tmp_path):
+    arquivo = tmp_path / "arquivo_invalido" / "tarefas.json"
+    pasta_pai = arquivo.parent
+    pasta_pai.mkdir()
+    (pasta_pai / "arquivo_invalido").write_text("conteudo", encoding="utf-8")  # cria um arquivo no lugar do diretório
+
+    store = ArmazenamentoSimples(arquivo)
+    store.adicionar("Tarefa de teste")

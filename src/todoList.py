@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QPushButton, QListWidget, QMessageBox
 )
-from src.style import apply_app_style, style_buttons, style_task_input, style_task_list
+from style import apply_app_style, style_buttons, style_task_input, style_task_list
 
 
 # === Classe responsável por salvar e carregar tarefas ===
@@ -28,7 +28,7 @@ class ArmazenamentoSimples:
             # Garante que o conteúdo é uma lista
             if not isinstance(self.tarefas, list):
                 self.tarefas = []
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError): # pragma: no cover
             # Se o arquivo estiver corrompido ou ilegível, começa vazio
             self.tarefas = []
 
@@ -154,7 +154,7 @@ class AplicativoTarefas(QWidget):
 
 
 # === Execução principal ===
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     app = QApplication([])
     apply_app_style(app)
     janela = AplicativoTarefas()
