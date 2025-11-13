@@ -17,7 +17,7 @@ Funcionalidades principais
 - Testes com pytest em `tests/` (`tests/test_to_do.py` cobre a camada de persistência)
 
 Requisitos
-- Python 3.8+ (testado com 3.10/3.11+)
+- Python 3.8+ (testado com 3.13+)
 - PyQt5
 - pytest (para executar os testes)
 
@@ -41,7 +41,7 @@ Como executar
 - Abrir a interface gráfica:
 
 ```powershell
-python to_do.py
+python src/to_do.py
 ```
 
 - Executar apenas os testes que cobrem `SimpleStore` (recomendado):
@@ -67,10 +67,3 @@ Contribuindo
 
 Licença
 - Sem licença explícita (adicione um arquivo LICENSE se quiser abrir para contribuição pública).
-
-Se quiser, eu posso:
-- Gerar um `tasks.py` compatível e atualizar os testes antigos.
-- Adicionar um README em inglês também.
-
----
-Atualizado: instruções em PowerShell e testes em português.
