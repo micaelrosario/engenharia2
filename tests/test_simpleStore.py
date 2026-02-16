@@ -67,7 +67,10 @@ def test_salvar_em_diretorio_invalido(tmp_path):
     arquivo = tmp_path / "arquivo_invalido" / "tarefas.json"
     pasta_pai = arquivo.parent
     pasta_pai.mkdir()
-    (pasta_pai / "arquivo_invalido").write_text("conteudo", encoding="utf-8")  # cria um arquivo no lugar do diretório
+    (pasta_pai / "arquivo_invalido").write_text(
+        "conteudo",
+        encoding="utf-8",
+    )  # cria um arquivo no lugar do diretório
 
     store = ArmazenamentoSimples(arquivo)
     store.adicionar("Tarefa de teste")

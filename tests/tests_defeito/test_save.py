@@ -37,7 +37,14 @@ def test_salvar_sobrescreve_arquivo_existente(tmp_path):
     """Verifica se salvar() sobrescreve corretamente um arquivo existente."""
     caminho = tmp_path / "tasks.json"
     caminho.parent.mkdir(parents=True, exist_ok=True)
-    caminho.write_text(json.dumps([{"id": 99, "titulo": "Antigo", "feito": True}]), encoding="utf-8")
+    caminho.write_text(
+        json.dumps(
+            [
+                {"id": 99, "titulo": "Antigo", "feito": True},
+            ]
+        ),
+        encoding="utf-8",
+    )
 
     store = ArmazenamentoSimples(caminho)
     store.tarefas = [{"id": 5, "titulo": "Novo", "feito": False}]

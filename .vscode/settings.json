@@ -3,6 +3,9 @@
         "connectionId": "micaelrosario",
         "projectKey": "micaelrosario_engenharia2"
     },
+    "sonarlint.analysis.extraProperties": {
+        "sonar.python.version": "3.13"
+    },
     "python.analysis.diagnosticMode": "workspace",
     "python.analysis.typeCheckingMode": "strict"
 }

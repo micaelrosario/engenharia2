@@ -1,10 +1,15 @@
 import pytest
 from PyQt5.QtWidgets import QApplication, QPushButton, QLineEdit, QListWidget
 from PyQt5.QtGui import QFont, QPalette
-from PyQt5.QtCore import Qt
 
 # importa o módulo que estamos testando
-import src.style as style
+from src import style
+
+BASE_FONT_PT = 12
+BUTTON_MIN_HEIGHT = 44
+TASK_INPUT_HEIGHT = 44
+TASK_INPUT_FONT_PT = 14
+TASK_LIST_FONT_PT = 15
 
 
 @pytest.fixture(scope="session")
@@ -34,10 +39,10 @@ def test_paleta_escura_retorna_qpalette():
 
 # === Testes para apply_app_style ===
 def test_apply_app_style_aplica_paleta_e_fonte(app):
-    style.apply_app_style(app, base_font_pt=12)
+    style.apply_app_style(app, base_font_pt=BASE_FONT_PT)
     font = app.font()
     assert isinstance(font, QFont)
-    assert font.pointSize() == 12
+    assert font.pointSize() == BASE_FONT_PT
 
 
 # === Testes para style_buttons ===
@@ -47,7 +52,7 @@ def test_style_buttons_aplica_estilos(app):
     style.style_buttons([btn1, btn2])
 
     for btn in (btn1, btn2):
-        assert btn.minimumHeight() == 44
+        assert btn.minimumHeight() == BUTTON_MIN_HEIGHT
         assert isinstance(btn.font(), QFont)
         assert "QPushButton" in btn.styleSheet()
 
@@ -56,18 +61,23 @@ def test_style_buttons_aplica_estilos(app):
 def test_style_task_input_aplica_altura_e_fonte(app):
     inp = QLineEdit()
     style.style_task_input(inp)
-    assert inp.height() == 44
+    assert inp.height() == TASK_INPUT_HEIGHT
     assert isinstance(inp.font(), QFont)
-    assert inp.font().pointSize() == 14
+    assert inp.font().pointSize() == TASK_INPUT_FONT_PT
 
 
 # === Testes para style_task_list ===
 def test_style_task_list_aplica_estilo_e_fonte(app):
     lst = QListWidget()
-    style.style_task_list(lst, font_pt=15, item_height=38, bg_color="#fafafa")
+    style.style_task_list(
+        lst,
+        font_pt=TASK_LIST_FONT_PT,
+        item_height=38,
+        bg_color="#fafafa",
+    )
 
     f = lst.font()
-    assert f.pointSize() == 15
+    assert f.pointSize() == TASK_LIST_FONT_PT
     css = lst.styleSheet()
     assert "QListWidget" in css
     assert "background: #fafafa" in css

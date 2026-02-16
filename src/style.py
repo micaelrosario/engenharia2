@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QStyleFactory
 
 
 # === Estilo dos botões com efeito hover ===
@@ -27,11 +28,20 @@ def paleta_escura():
     paleta = QPalette()
     paleta.setColor(QPalette.Window, QColor(30, 30, 30))        # Cor do fundo da janela
     paleta.setColor(QPalette.WindowText, Qt.white)              # Cor do texto geral
-    paleta.setColor(QPalette.Base, QColor(20, 20, 20))          # Fundo dos campos de texto
-    paleta.setColor(QPalette.Text, Qt.black)                    # Texto digitado nos campos
+    paleta.setColor(
+        QPalette.Base,
+        QColor(20, 20, 20),
+    )  # Fundo dos campos de texto
+    paleta.setColor(
+        QPalette.Text,
+        Qt.white,
+    )  # Texto digitado nos campos
     paleta.setColor(QPalette.Button, QColor(45, 45, 45))        # Cor dos botões
     paleta.setColor(QPalette.ButtonText, Qt.white)              # Texto dos botões
-    paleta.setColor(QPalette.Highlight, QColor(0, 170, 255))    # Cor de destaque (seleção)
+    paleta.setColor(
+        QPalette.Highlight,
+        QColor(0, 170, 255),
+    )  # Cor de destaque (seleção)
     paleta.setColor(QPalette.HighlightedText, Qt.white)         # Texto em destaque
     return paleta
 
@@ -41,6 +51,12 @@ def apply_app_style(app, base_font_pt: int = 11):
     """Aplica paleta e fonte global à aplicação Qt."""
     if not app:
         raise ValueError("Objeto 'app' inválido: aplicação Qt não fornecida.")
+
+    # Garante widgets consistentes e que respeitam a paleta (evita diálogos nativos
+    # com contraste ruim em alguns ambientes).
+    fusion = QStyleFactory.create("Fusion")
+    if fusion is not None:  # pragma: no branch
+        app.setStyle(fusion)
     
     f = QFont()
     f.setPointSize(base_font_pt)
@@ -48,6 +64,19 @@ def apply_app_style(app, base_font_pt: int = 11):
 
     paleta = paleta_escura()
     app.setPalette(paleta)
+
+
+def style_message_box(box) -> None:
+    """Aplica um estilo legível para QMessageBox baseado na paleta do app."""
+    if box is None:
+        return
+
+    box.setStyleSheet(
+        ""
+        "QMessageBox { background: palette(window); }"
+        "QLabel { color: palette(window-text); }"
+        ""
+    )
 
 
 # === Aplica estilo consistente aos botões ===
@@ -79,7 +108,12 @@ def style_task_input(inp, height: int = 44, font_pt: int = 14):
 
 
 # === Estilo da lista de tarefas ===
-def style_task_list(lst, font_pt: int = 13, item_height: int = 36, bg_color: str = "#ffffff"):
+def style_task_list(
+    lst,
+    font_pt: int = 13,
+    item_height: int = 36,
+    bg_color: str = "#ffffff",
+):
     """Aplica estilo visual à lista de tarefas."""
     if lst is None:
         return
@@ -88,16 +122,33 @@ def style_task_list(lst, font_pt: int = 13, item_height: int = 36, bg_color: str
     f.setPointSize(font_pt)
     lst.setFont(f)
 
+    # Mantém a lista legível mesmo em tema escuro: fundo claro + texto escuro.
+    # (A paleta global pode definir Text como branco.)
+    p = lst.palette()
+    p.setColor(QPalette.Base, QColor(bg_color))
+    p.setColor(QPalette.Text, Qt.black)
+    p.setColor(QPalette.HighlightedText, Qt.black)
+    lst.setPalette(p)
+
     # padding e cor de fundo (personalizável)
     lst.setStyleSheet(
         f"""
         QListWidget {{
             padding: 6px;
             background: {bg_color};
+            outline: none;
         }}
         QListWidget::item {{
             padding: 8px 6px;
             height: {item_height}px;
+            color: black;
+        }}
+        QListWidget::item:selected {{
+            background: palette(mid);
+            color: black;
+        }}
+        QListWidget::item:focus {{
+            outline: none;
         }}
         """
     )

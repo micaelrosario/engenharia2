@@ -10,7 +10,11 @@ from .base import BaseStore
 class JsonListStore(BaseStore[Dict[str, Any]]):
     """Persistência simples: salva/carrega uma lista de dicionários em JSON."""
 
-    def __init__(self, caminho_arquivo: Path, default: Optional[List[Dict[str, Any]]] = None):
+    def __init__(
+        self,
+        caminho_arquivo: Path,
+        default: Optional[List[Dict[str, Any]]] = None,
+    ):
         self.caminho_arquivo = Path(caminho_arquivo)
         self._default = default if default is not None else []
 

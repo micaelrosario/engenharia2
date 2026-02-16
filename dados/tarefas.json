@@ -1,6 +1,10 @@
 [
     {
         "titulo": "dormir",
-        "feito": true
+        "feito": false
+    },
+    {
+        "titulo": "limpar quarto",
+        "feito": false
     }
 ]

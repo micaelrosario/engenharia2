@@ -10,6 +10,11 @@ except ImportError:  # pragma: no cover
     # Quando executado com a pasta src no sys.path
     from persistence.json_store import JsonListStore
 
+try:
+    from .tarefa_service import TarefaService
+except ImportError:  # pragma: no cover
+    from services.tarefa_service import TarefaService
+
 
 class ArmazenamentoSimples:
     """Camada de backend para tarefas (sem UI).
@@ -21,30 +26,29 @@ class ArmazenamentoSimples:
     def __init__(self, caminho_arquivo: Path):
         self.caminho_arquivo = Path(caminho_arquivo)
         self._store = JsonListStore(self.caminho_arquivo, default=[])
-        self.tarefas: List[Dict[str, Any]] = []
+        self._service = TarefaService(self._store)
         self.carregar()
 
+    @property
+    def tarefas(self) -> List[Dict[str, Any]]:
+        return self._service.to_dicts()
+
+    @tarefas.setter
+    def tarefas(self, value: List[Dict[str, Any]]) -> None:
+        self._service.set_from_dicts(value)
+
     def carregar(self) -> None:
-        self.tarefas = self._store.carregar()
+        self._service.carregar()
 
     def salvar(self) -> bool:
-        self._store.salvar(self.tarefas)
+        self._service.salvar()
         return self.caminho_arquivo.exists()
 
     def adicionar(self, titulo: str) -> None:
-        titulo = titulo.strip()
-        if not titulo:
-            return
-        self.tarefas.append({"titulo": titulo, "feito": False})
-        self.salvar()
+        self._service.adicionar(titulo)
 
     def remover(self, indice: int) -> None:
-        if 0 <= indice < len(self.tarefas):
-            self.tarefas.pop(indice)
-            self.salvar()
+        self._service.remover_por_indice(indice)
 
     def alternar_status(self, indice: int) -> None:
-        if 0 <= indice < len(self.tarefas):
-            atual = bool(self.tarefas[indice].get("feito"))
-            self.tarefas[indice]["feito"] = not atual
-            self.salvar()
+        self._service.alternar_status_por_indice(indice)
