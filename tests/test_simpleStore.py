@@ -1,5 +1,5 @@
 import json
-from src.todoList import ArmazenamentoSimples, AplicativoTarefas
+from src.services.simple_store import ArmazenamentoSimples
 
 
 

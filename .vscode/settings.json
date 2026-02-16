@@ -1,0 +1,8 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "micaelrosario",
+        "projectKey": "micaelrosario_engenharia2"
+    },
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.typeCheckingMode": "strict"
+}
