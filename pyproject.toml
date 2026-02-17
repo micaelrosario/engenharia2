@@ -1,2 +1,14 @@
 [tool.ruff.lint]
 select = ["E", "F", "C90", "PLR", "SIM"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+	"src/__main__.py",
+	"src/todoList.py",
+	"src/ui/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false

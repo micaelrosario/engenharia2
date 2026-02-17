@@ -21,29 +21,51 @@ class TarefaService:
         self._store = store
         self._tarefas: List[Tarefa] = []
 
+    @staticmethod
+    def _normalizar_titulo(titulo: str) -> str:
+        return (titulo or "").strip()
+
+    @staticmethod
+    def _titulo_valido(titulo: str) -> bool:
+        return bool(TarefaService._normalizar_titulo(titulo))
+
     @property
     def tarefas(self) -> List[Tarefa]:
         return list(self._tarefas)
 
     def carregar(self) -> None:
         dados = self._store.carregar()
-        self._tarefas = [Tarefa.from_dict(d) for d in dados if isinstance(d, dict)]
+        tarefas = [Tarefa.from_dict(d) for d in dados if isinstance(d, dict)]
+        tarefas_validas = [t for t in tarefas if t.titulo]
+        self._tarefas = tarefas_validas
+
+        # Remove registros "fantasmas" (títulos vazios/apenas espaços) do arquivo.
+        if len(tarefas_validas) != len(tarefas):
+            self.salvar()
 
     def salvar(self) -> None:
+        # Defesa extra: nunca persiste tarefas vazias.
+        self._tarefas = [t for t in self._tarefas if t.titulo]
         self._store.salvar([t.to_dict() for t in self._tarefas])
 
     def set_from_dicts(self, tarefas: List[Dict[str, Any]]) -> None:
-        self._tarefas = [Tarefa.from_dict(t) for t in tarefas if isinstance(t, dict)]
+        parsed = [Tarefa.from_dict(t) for t in tarefas if isinstance(t, dict)]
+        self._tarefas = [t for t in parsed if t.titulo]
 
     def to_dicts(self) -> List[Dict[str, Any]]:
         return [t.to_dict() for t in self._tarefas]
 
-    def adicionar(self, titulo: str) -> None:
-        titulo = (titulo or "").strip()
+    def adicionar(self, titulo: str) -> bool:
+        titulo = self._normalizar_titulo(titulo)
         if not titulo:
-            return
+            return False
+
+        if any(t.titulo == titulo for t in self._tarefas):
+            return False
+
         self._tarefas.append(Tarefa(titulo=titulo, feito=False, id=None))
         self.salvar()
+        return True
 
     def remover_por_indice(self, indice: int) -> None:
         if 0 <= indice < len(self._tarefas):

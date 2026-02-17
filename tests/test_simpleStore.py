@@ -14,7 +14,7 @@ def test_adiciona_tarefa_e_salva(tmp_path):
     """Verifica se adicionar() cria e salva a tarefa corretamente."""
     caminho = tmp_path / "tarefas.json"
     store = ArmazenamentoSimples(caminho)
-    store.adicionar("Comprar pão")
+    assert store.adicionar("Comprar pão") is True
 
     tarefa = store.tarefas[0]
     assert tarefa == {"titulo": "Comprar pão", "feito": False}
@@ -24,11 +24,52 @@ def test_adiciona_tarefa_e_salva(tmp_path):
     assert dados == store.tarefas
 
 
+def test_nao_adiciona_tarefa_vazia_ou_so_espacos(tmp_path):
+    caminho = tmp_path / "tarefas.json"
+    store = ArmazenamentoSimples(caminho)
+
+    assert store.adicionar("   ") is False
+    assert store.tarefas == []
+    assert not caminho.exists()
+
+
+def test_bloqueia_tarefas_duplicadas(tmp_path):
+    caminho = tmp_path / "tarefas.json"
+    store = ArmazenamentoSimples(caminho)
+
+    assert store.adicionar("dormir") is True
+    assert store.adicionar("dormir") is False
+    assert store.tarefas == [{"titulo": "dormir", "feito": False}]
+
+
+def test_limpa_registros_fantasmas_ao_carregar(tmp_path):
+    caminho = tmp_path / "tarefas.json"
+    caminho.write_text(
+        json.dumps(
+            [
+                {"titulo": "   ", "feito": False},
+                {"titulo": "Ok", "feito": False},
+                {"titulo": "\n\t", "feito": True},
+            ],
+            ensure_ascii=False,
+            indent=4,
+        ),
+        encoding="utf-8",
+    )
+
+    store = ArmazenamentoSimples(caminho)
+    assert store.tarefas == [{"titulo": "Ok", "feito": False}]
+
+    # O arquivo também deve ser limpo para não manter "fantasmas".
+    dados = json.loads(caminho.read_text(encoding="utf-8"))
+    assert dados == [{"titulo": "Ok", "feito": False}]
+
+
 def test_remove_tarefa_da_lista(tmp_path):
     """Verifica se remover() exclui a tarefa corretamente."""
     caminho = tmp_path / "tarefas.json"
     store = ArmazenamentoSimples(caminho)
-    store.adicionar("Estudar Python")
+    assert store.adicionar("Estudar Python") is True
 
     store.remover(0)
     assert store.tarefas == []
@@ -38,7 +79,7 @@ def test_alternar_status_marca_e_desmarca(tmp_path):
     """Verifica se alternar_status() muda o estado da tarefa."""
     caminho = tmp_path / "tarefas.json"
     store = ArmazenamentoSimples(caminho)
-    store.adicionar("Fazer exercícios")
+    assert store.adicionar("Fazer exercícios") is True
 
     store.alternar_status(0)
     assert store.tarefas[0]["feito"]
@@ -50,7 +91,7 @@ def test_salvar_e_carregar(tmp_path):
     """Garante que salvar() e carregar() funcionam corretamente."""
     caminho = tmp_path / "tarefas.json"
     store = ArmazenamentoSimples(caminho)
-    store.adicionar("Ler um livro")
+    assert store.adicionar("Ler um livro") is True
 
     assert caminho.exists()
 
@@ -73,4 +114,4 @@ def test_salvar_em_diretorio_invalido(tmp_path):
     )  # cria um arquivo no lugar do diretório
 
     store = ArmazenamentoSimples(arquivo)
-    store.adicionar("Tarefa de teste")
+    assert store.adicionar("Tarefa de teste") is True

@@ -44,8 +44,8 @@ class ArmazenamentoSimples:
         self._service.salvar()
         return self.caminho_arquivo.exists()
 
-    def adicionar(self, titulo: str) -> None:
-        self._service.adicionar(titulo)
+    def adicionar(self, titulo: str) -> bool:
+        return self._service.adicionar(titulo)
 
     def remover(self, indice: int) -> None:
         self._service.remover_por_indice(indice)

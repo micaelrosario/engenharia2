@@ -11,10 +11,11 @@ from PyQt5.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMessageBox,
+    QShortcut,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView
-from PyQt5.QtGui import QBrush
+from PyQt5.QtGui import QBrush, QKeySequence
 
 try:
     # Quando importado como pacote (src.ui.main_window)
@@ -32,7 +33,6 @@ try:
         style_task_list,
     )
 except ImportError:  # pragma: no cover
-    # Quando executado com a pasta src no sys.path
     from style import (
         style_buttons,
         style_message_box,
@@ -48,6 +48,7 @@ class AplicativoTarefas(QWidget):
         super().__init__()
         self.setWindowTitle("Lista de Tarefas 📝")
         self._updating_list = False
+        self._ultima_remocao = []
         self._definir_tamanho_janela()
         self.armazenamento = ArmazenamentoSimples(Path("dados/tarefas.json"))
         self._configurar_interface()
@@ -60,14 +61,16 @@ class AplicativoTarefas(QWidget):
     def _configurar_interface(self) -> None:
         layout_principal = QVBoxLayout()
         layout_input = QHBoxLayout()
+        layout_acoes = QHBoxLayout()
 
         self.campo_tarefa = QLineEdit()
         self.campo_tarefa.setPlaceholderText("Digite uma nova tarefa...")
         style_task_input(self.campo_tarefa)
 
         self.botao_adicionar = QPushButton("Adicionar")
+        self.botao_desfazer = QPushButton("Desfazer")
         self.botao_remover = QPushButton("Remover")
-        style_buttons([self.botao_adicionar, self.botao_remover])
+        style_buttons([self.botao_adicionar, self.botao_desfazer, self.botao_remover])
 
         self.lista_tarefas = QListWidget()
         self.lista_tarefas.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -77,15 +80,22 @@ class AplicativoTarefas(QWidget):
         layout_input.addWidget(self.botao_adicionar)
         layout_principal.addLayout(layout_input)
         layout_principal.addWidget(self.lista_tarefas)
-        layout_principal.addWidget(self.botao_remover)
+
+        layout_acoes.addWidget(self.botao_desfazer)
+        layout_acoes.addWidget(self.botao_remover)
+        layout_principal.addLayout(layout_acoes)
         self.setLayout(layout_principal)
 
         self.botao_adicionar.clicked.connect(self._adicionar_tarefa)
+        self.botao_desfazer.clicked.connect(self._desfazer_ultima_remocao)
         self.botao_remover.clicked.connect(self._remover_tarefa)
         self.lista_tarefas.itemDoubleClicked.connect(self._alternar_status_tarefa)
         self.lista_tarefas.itemChanged.connect(self._on_item_changed)
         self.lista_tarefas.currentRowChanged.connect(self._atualizar_estado_botoes)
         self.campo_tarefa.returnPressed.connect(self._adicionar_tarefa)
+
+        self._atalho_desfazer = QShortcut(QKeySequence.Undo, self)
+        self._atalho_desfazer.activated.connect(self._desfazer_ultima_remocao)
 
         self._atualizar_estado_botoes()
 
@@ -120,7 +130,12 @@ class AplicativoTarefas(QWidget):
         if not titulo:
             self._mostrar_aviso("Digite uma tarefa antes de adicionar.")
             return
-        self.armazenamento.adicionar(titulo)
+
+        adicionado = self.armazenamento.adicionar(titulo)
+        if not adicionado:
+            self._mostrar_aviso("Essa tarefa já existe.")
+            return
+
         self.campo_tarefa.clear()
         self._carregar_tarefas_salvas()
 
@@ -130,19 +145,64 @@ class AplicativoTarefas(QWidget):
             self._mostrar_aviso("Selecione uma tarefa para remover.")
             return
 
+        if not self._confirmar_remocao(len(itens)):
+            return
+
         indices = sorted(
             {self.lista_tarefas.row(item) for item in itens},
             reverse=True,
         )
 
         tarefas = self.armazenamento.tarefas
+        removidas = []
         for indice in indices:
             if 0 <= indice < len(tarefas):
+                removidas.append((indice, tarefas[indice]))
                 tarefas.pop(indice)
 
         self.armazenamento.tarefas = tarefas
         self.armazenamento.salvar()
+        self._ultima_remocao = sorted(removidas, key=lambda x: x[0])
         self._carregar_tarefas_salvas()
+        self.lista_tarefas.setFocus()
+
+    def _desfazer_ultima_remocao(self) -> None:
+        if not self._ultima_remocao:
+            return
+
+        tarefas = self.armazenamento.tarefas
+        titulos_atuais = {str(t.get("titulo", "")).strip() for t in tarefas}
+
+        restauradas = 0
+        puladas = 0
+        for indice, tarefa in self._ultima_remocao:
+            titulo = str(tarefa.get("titulo", "")).strip()
+            if not titulo:
+                continue
+
+            if titulo in titulos_atuais:
+                puladas += 1
+                continue
+
+            pos = indice if 0 <= indice <= len(tarefas) else len(tarefas)
+            tarefas.insert(pos, tarefa)
+            titulos_atuais.add(titulo)
+            restauradas += 1
+
+        self._ultima_remocao = []
+        self.armazenamento.tarefas = tarefas
+        self.armazenamento.salvar()
+        self._carregar_tarefas_salvas()
+
+        if restauradas and puladas:
+            self._mostrar_info(
+                (
+                    f"Desfez {restauradas} remoção(ões). {puladas} tarefa(s) não foram "
+                    "restauradas por já existirem."
+                )
+            )
+        elif restauradas:
+            self._mostrar_info(f"Desfez {restauradas} remoção(ões).")
 
     def _on_item_changed(self, item: QListWidgetItem) -> None:
         if self._updating_list:
@@ -181,6 +241,7 @@ class AplicativoTarefas(QWidget):
 
     def _atualizar_estado_botoes(self) -> None:
         self.botao_remover.setEnabled(len(self.lista_tarefas.selectedItems()) > 0)
+        self.botao_desfazer.setEnabled(bool(self._ultima_remocao))
 
     def _mostrar_aviso(self, mensagem: str) -> None:
         box = QMessageBox(self)
@@ -190,6 +251,29 @@ class AplicativoTarefas(QWidget):
         box.setStandardButtons(QMessageBox.Ok)
         style_message_box(box)
         box.exec_()
+
+    def _mostrar_info(self, mensagem: str) -> None:
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Information)
+        box.setWindowTitle("Informação")
+        box.setText(mensagem)
+        box.setStandardButtons(QMessageBox.Ok)
+        style_message_box(box)
+        box.exec_()
+
+    def _confirmar_remocao(self, quantidade: int) -> bool:
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Question)
+        box.setWindowTitle("Confirmar remoção")
+        box.setText(
+            "Tem certeza que deseja remover esta tarefa?"
+            if quantidade == 1
+            else f"Tem certeza que deseja remover {quantidade} tarefas?"
+        )
+        box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        box.setDefaultButton(QMessageBox.No)
+        style_message_box(box)
+        return box.exec_() == QMessageBox.Yes
 
     def _aplicar_estilo_conclusao(self, item: QListWidgetItem) -> None:
         fonte = item.font()
