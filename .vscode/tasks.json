@@ -6,6 +6,14 @@
       "type": "shell",
       "command": "${command:python.interpreterPath}",
       "args": ["-m", "ruff", "check", "."],
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": ["/d", "/c"]
+          }
+        }
+      },
       "problemMatcher": []
     },
     {
@@ -13,6 +21,14 @@
       "type": "shell",
       "command": "${command:python.interpreterPath}",
       "args": ["-m", "ruff", "check", ".", "--fix"],
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": ["/d", "/c"]
+          }
+        }
+      },
       "problemMatcher": []
     },
     {
@@ -20,6 +36,14 @@
       "type": "shell",
       "command": "${command:python.interpreterPath}",
       "args": ["-m", "ruff", "format", "."],
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": ["/d", "/c"]
+          }
+        }
+      },
       "problemMatcher": []
     },
     {
@@ -27,6 +51,14 @@
       "type": "shell",
       "command": "${command:python.interpreterPath}",
       "args": ["-m", "pytest"],
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": ["/d", "/c"]
+          }
+        }
+      },
       "problemMatcher": []
     }
   ]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from .base import BaseStore
 
@@ -32,7 +32,8 @@ class JsonListStore(BaseStore[Dict[str, Any]]):
             return list(self._default)
 
         # Garante formato básico (lista de dicts). Itens inválidos são ignorados.
-        return [item for item in dados if isinstance(item, dict)]
+        dados_list = cast(List[Any], dados)
+        return [item for item in dados_list if isinstance(item, dict)]
 
     def salvar(self, itens: List[Dict[str, Any]]) -> None:
         pasta_pai = self.caminho_arquivo.parent

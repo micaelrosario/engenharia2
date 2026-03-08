@@ -13,13 +13,17 @@ TASK_LIST_FONT_PT = 15
 
 
 @pytest.fixture(scope="session")
-def app():
+def app() -> QApplication:
     """Cria uma instância única de QApplication para os testes."""
     import sys
-    app = QApplication.instance()
-    if not app:
-        app = QApplication(sys.argv)
-    return app
+    app_instance = QApplication.instance()
+    if app_instance is None:
+        return QApplication(sys.argv)
+
+    if not isinstance(app_instance, QApplication):
+        raise RuntimeError("Instância Qt existente não é QApplication.")
+
+    return app_instance
 
 
 # === Testes para estilo_botoes ===
@@ -38,7 +42,7 @@ def test_paleta_escura_retorna_qpalette():
 
 
 # === Testes para apply_app_style ===
-def test_apply_app_style_aplica_paleta_e_fonte(app):
+def test_apply_app_style_aplica_paleta_e_fonte(app: QApplication) -> None:
     style.apply_app_style(app, base_font_pt=BASE_FONT_PT)
     font = app.font()
     assert isinstance(font, QFont)
@@ -46,7 +50,7 @@ def test_apply_app_style_aplica_paleta_e_fonte(app):
 
 
 # === Testes para style_buttons ===
-def test_style_buttons_aplica_estilos(app):
+def test_style_buttons_aplica_estilos(app: QApplication) -> None:
     btn1 = QPushButton("Botão 1")
     btn2 = QPushButton("Botão 2")
     style.style_buttons([btn1, btn2])
@@ -58,7 +62,7 @@ def test_style_buttons_aplica_estilos(app):
 
 
 # === Testes para style_task_input ===
-def test_style_task_input_aplica_altura_e_fonte(app):
+def test_style_task_input_aplica_altura_e_fonte(app: QApplication) -> None:
     inp = QLineEdit()
     style.style_task_input(inp)
     assert inp.height() == TASK_INPUT_HEIGHT
@@ -67,7 +71,7 @@ def test_style_task_input_aplica_altura_e_fonte(app):
 
 
 # === Testes para style_task_list ===
-def test_style_task_list_aplica_estilo_e_fonte(app):
+def test_style_task_list_aplica_estilo_e_fonte(app: QApplication) -> None:
     lst = QListWidget()
     style.style_task_list(
         lst,

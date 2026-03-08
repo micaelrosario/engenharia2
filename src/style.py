@@ -1,6 +1,17 @@
-from PyQt5.QtGui import QPalette, QColor, QFont
+from __future__ import annotations
+
+from typing import Sequence
+
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QStyleFactory
+from PyQt5.QtGui import QColor, QFont, QPalette
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLineEdit,
+    QListWidget,
+    QMessageBox,
+    QStyleFactory,
+    QWidget,
+)
 
 
 # === Estilo dos botões com efeito hover ===
@@ -47,7 +58,7 @@ def paleta_escura():
 
 
 # === Aplica tema global e fonte base ===
-def apply_app_style(app, base_font_pt: int = 11):
+def apply_app_style(app: QApplication | None, base_font_pt: int = 11) -> None:
     """Aplica paleta e fonte global à aplicação Qt."""
     if not app:
         raise ValueError("Objeto 'app' inválido: aplicação Qt não fornecida.")
@@ -55,9 +66,8 @@ def apply_app_style(app, base_font_pt: int = 11):
     # Garante widgets consistentes e que respeitam a paleta (evita diálogos nativos
     # com contraste ruim em alguns ambientes).
     fusion = QStyleFactory.create("Fusion")
-    if fusion is not None:  # pragma: no branch
-        app.setStyle(fusion)
-    
+    app.setStyle(fusion)
+
     f = QFont()
     f.setPointSize(base_font_pt)
     app.setFont(f)
@@ -66,7 +76,7 @@ def apply_app_style(app, base_font_pt: int = 11):
     app.setPalette(paleta)
 
 
-def style_message_box(box) -> None:
+def style_message_box(box: QMessageBox | None) -> None:
     """Aplica um estilo legível para QMessageBox baseado na paleta do app."""
     if box is None:
         return
@@ -80,7 +90,11 @@ def style_message_box(box) -> None:
 
 
 # === Aplica estilo consistente aos botões ===
-def style_buttons(buttons, min_height: int = 44, font_pt: int = 13):
+def style_buttons(
+    buttons: Sequence[QWidget | None] | None,
+    min_height: int = 44,
+    font_pt: int = 13,
+) -> None:
     """Aplica estilo consistente a uma lista de botões."""
     if not buttons:
         return
@@ -96,7 +110,11 @@ def style_buttons(buttons, min_height: int = 44, font_pt: int = 13):
 
 
 # === Estilo do campo de entrada de tarefas ===
-def style_task_input(inp, height: int = 44, font_pt: int = 14):
+def style_task_input(
+    inp: QLineEdit | None,
+    height: int = 44,
+    font_pt: int = 14,
+) -> None:
     """Aplica altura e fonte ao campo de entrada."""
     if inp is None:
         return
@@ -109,7 +127,7 @@ def style_task_input(inp, height: int = 44, font_pt: int = 14):
 
 # === Estilo da lista de tarefas ===
 def style_task_list(
-    lst,
+    lst: QListWidget | None,
     font_pt: int = 13,
     item_height: int = 36,
     bg_color: str = "#ffffff",

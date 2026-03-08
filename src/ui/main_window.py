@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from PyQt5.QtWidgets import (
     QWidget,
@@ -44,13 +45,15 @@ except ImportError:  # pragma: no cover
 class AplicativoTarefas(QWidget):
     """Interface principal do aplicativo de lista de tarefas."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Lista de Tarefas 📝")
-        self._updating_list = False
-        self._ultima_remocao = []
+        self._updating_list: bool = False
+        self._ultima_remocao: list[tuple[int, dict[str, Any]]] = []
         self._definir_tamanho_janela()
-        self.armazenamento = ArmazenamentoSimples(Path("dados/tarefas.json"))
+        self.armazenamento: ArmazenamentoSimples = ArmazenamentoSimples(
+            Path("dados/tarefas.json")
+        )
         self._configurar_interface()
         self._carregar_tarefas_salvas()
 
@@ -153,8 +156,8 @@ class AplicativoTarefas(QWidget):
             reverse=True,
         )
 
-        tarefas = self.armazenamento.tarefas
-        removidas = []
+        tarefas: list[dict[str, Any]] = self.armazenamento.tarefas
+        removidas: list[tuple[int, dict[str, Any]]] = []
         for indice in indices:
             if 0 <= indice < len(tarefas):
                 removidas.append((indice, tarefas[indice]))
@@ -170,8 +173,8 @@ class AplicativoTarefas(QWidget):
         if not self._ultima_remocao:
             return
 
-        tarefas = self.armazenamento.tarefas
-        titulos_atuais = {str(t.get("titulo", "")).strip() for t in tarefas}
+        tarefas: list[dict[str, Any]] = self.armazenamento.tarefas
+        titulos_atuais: set[str] = {str(t.get("titulo", "")).strip() for t in tarefas}
 
         restauradas = 0
         puladas = 0
@@ -234,7 +237,7 @@ class AplicativoTarefas(QWidget):
         if deseja_feito != atual_feito:
             self.armazenamento.alternar_status(indice)
 
-    def _alternar_status_tarefa(self, item) -> None:
+    def _alternar_status_tarefa(self, item: QListWidgetItem) -> None:
         # Mantém o duplo clique como atalho: alterna o checkbox.
         estado = item.checkState()
         item.setCheckState(Qt.Unchecked if estado == Qt.Checked else Qt.Checked)

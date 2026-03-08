@@ -1,10 +1,12 @@
 import json
+from pathlib import Path
+
 import pytest
 
 from src.services.simple_store import ArmazenamentoSimples
 
 
-def test_salvar_cria_arquivo_e_conteudo(tmp_path):
+def test_salvar_cria_arquivo_e_conteudo(tmp_path: Path) -> None:
     """Verifica se salvar() cria o arquivo e grava corretamente as tarefas."""
     caminho = tmp_path / "data" / "tasks.json"
     store = ArmazenamentoSimples(caminho)
@@ -21,7 +23,7 @@ def test_salvar_cria_arquivo_e_conteudo(tmp_path):
     assert dados == store.tarefas
 
 
-def test_salvar_cria_pastas_necessarias(tmp_path):
+def test_salvar_cria_pastas_necessarias(tmp_path: Path) -> None:
     """Verifica se salvar() cria as pastas pai automaticamente."""
     caminho_aninhado = tmp_path / "a" / "b" / "c" / "tasks.json"
     store = ArmazenamentoSimples(caminho_aninhado)
@@ -33,7 +35,7 @@ def test_salvar_cria_pastas_necessarias(tmp_path):
     assert caminho_aninhado.exists()
 
 
-def test_salvar_sobrescreve_arquivo_existente(tmp_path):
+def test_salvar_sobrescreve_arquivo_existente(tmp_path: Path) -> None:
     """Verifica se salvar() sobrescreve corretamente um arquivo existente."""
     caminho = tmp_path / "tasks.json"
     caminho.parent.mkdir(parents=True, exist_ok=True)
@@ -56,7 +58,7 @@ def test_salvar_sobrescreve_arquivo_existente(tmp_path):
     assert dados == store.tarefas
 
 
-def test_salvar_erro_quando_pai_e_arquivo(tmp_path):
+def test_salvar_erro_quando_pai_e_arquivo(tmp_path: Path) -> None:
     """Garante que salvar() lança FileExistsError se o diretório pai for um arquivo."""
     bloqueado = tmp_path / "src"
     bloqueado.write_text("Sou um arquivo, não um diretório", encoding="utf-8")

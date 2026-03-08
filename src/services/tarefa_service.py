@@ -35,7 +35,7 @@ class TarefaService:
 
     def carregar(self) -> None:
         dados = self._store.carregar()
-        tarefas = [Tarefa.from_dict(d) for d in dados if isinstance(d, dict)]
+        tarefas = [Tarefa.from_dict(d) for d in dados]
         tarefas_validas = [t for t in tarefas if t.titulo]
         self._tarefas = tarefas_validas
 
@@ -49,7 +49,7 @@ class TarefaService:
         self._store.salvar([t.to_dict() for t in self._tarefas])
 
     def set_from_dicts(self, tarefas: List[Dict[str, Any]]) -> None:
-        parsed = [Tarefa.from_dict(t) for t in tarefas if isinstance(t, dict)]
+        parsed = [Tarefa.from_dict(t) for t in tarefas]
         self._tarefas = [t for t in parsed if t.titulo]
 
     def to_dicts(self) -> List[Dict[str, Any]]:
