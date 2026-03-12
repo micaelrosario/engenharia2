@@ -14,46 +14,93 @@ from PyQt5.QtWidgets import (
 )
 
 
+# === Tokens de tema (escuro + acento azul) ===
+# Mantém Window=#1e1e1e (coberto por testes).
+COLOR_BG = "#1e1e1e"
+COLOR_SURFACE = "#2b2f3a"
+COLOR_SURFACE_HOVER = "#343b4a"
+COLOR_BORDER = "#3b4252"
+
+COLOR_TEXT = "#f8fafc"
+COLOR_TEXT_DISABLED = "#94a3b8"
+
+COLOR_ACCENT = "#3b82f6"
+COLOR_ACCENT_HOVER = "#2563eb"
+COLOR_ACCENT_PRESSED = "#1d4ed8"
+COLOR_ACCENT_SOFT_HOVER = "#eff6ff"
+COLOR_ACCENT_SOFT_SELECTED = "#dbeafe"
+COLOR_ACCENT_SOFT_ACTIVE = "#bfdbfe"
+
+COLOR_INPUT_BG = "#111827"
+COLOR_INPUT_BORDER = "#334155"
+COLOR_LIST_BORDER = "#d1d5db"
+
+
 # === Estilo dos botões com efeito hover ===
-def estilo_botoes():
-    return """
-        QPushButton {
-            background-color: #2d2d2d;
-            color: white;
-            border: 2px solid #444;
-            border-radius: 8px;
+def estilo_botoes() -> str:
+    """Retorna o stylesheet padrão de botões do app."""
+    return f"""
+        QPushButton {{
+            background-color: {COLOR_SURFACE};
+            color: {COLOR_TEXT};
+            border: 1px solid {COLOR_BORDER};
+            border-radius: 10px;
             padding: 10px 14px;
             min-height: 40px;
             font-size: 13pt;
-        }
-        QPushButton:hover {
-            background-color: #3d3d3d;
+        }}
+        QPushButton:hover {{
+            background-color: {COLOR_SURFACE_HOVER};
+            border: 1px solid {COLOR_ACCENT};
+        }}
+        QPushButton:pressed {{
+            background-color: {COLOR_BORDER};
+        }}
+        QPushButton:focus {{
+            border: 1px solid {COLOR_ACCENT};
+        }}
+        QPushButton:disabled {{
+            background-color: {COLOR_BG};
+            color: {COLOR_TEXT_DISABLED};
+            border: 1px solid {COLOR_BORDER};
+        }}
+
+        QPushButton[variant="primary"] {{
+            background-color: {COLOR_ACCENT};
+            border: 1px solid {COLOR_ACCENT};
             color: white;
-            border: 2px solid #00aaff;
-        }
+        }}
+        QPushButton[variant="primary"]:hover {{
+            background-color: {COLOR_ACCENT_HOVER};
+            border: 1px solid {COLOR_ACCENT_HOVER};
+        }}
+        QPushButton[variant="primary"]:pressed {{
+            background-color: {COLOR_ACCENT_PRESSED};
+            border: 1px solid {COLOR_ACCENT_PRESSED};
+        }}
     """
 
 
 # === Paleta de cores para tema escuro ===
-def paleta_escura():
+def paleta_escura() -> QPalette:
     paleta = QPalette()
-    paleta.setColor(QPalette.Window, QColor(30, 30, 30))        # Cor do fundo da janela
-    paleta.setColor(QPalette.WindowText, Qt.white)              # Cor do texto geral
+    paleta.setColor(QPalette.Window, QColor(30, 30, 30))  # Cor do fundo da janela
+    paleta.setColor(QPalette.WindowText, Qt.white)  # Cor do texto geral
     paleta.setColor(
         QPalette.Base,
-        QColor(20, 20, 20),
+        QColor(COLOR_INPUT_BG),
     )  # Fundo dos campos de texto
     paleta.setColor(
         QPalette.Text,
         Qt.white,
     )  # Texto digitado nos campos
-    paleta.setColor(QPalette.Button, QColor(45, 45, 45))        # Cor dos botões
-    paleta.setColor(QPalette.ButtonText, Qt.white)              # Texto dos botões
+    paleta.setColor(QPalette.Button, QColor(COLOR_SURFACE))  # Cor dos botões
+    paleta.setColor(QPalette.ButtonText, Qt.white)  # Texto dos botões
     paleta.setColor(
         QPalette.Highlight,
-        QColor(0, 170, 255),
+        QColor(COLOR_ACCENT),
     )  # Cor de destaque (seleção)
-    paleta.setColor(QPalette.HighlightedText, Qt.white)         # Texto em destaque
+    paleta.setColor(QPalette.HighlightedText, Qt.white)  # Texto em destaque
     return paleta
 
 
@@ -82,10 +129,13 @@ def style_message_box(box: QMessageBox | None) -> None:
         return
 
     box.setStyleSheet(
-        ""
-        "QMessageBox { background: palette(window); }"
-        "QLabel { color: palette(window-text); }"
-        ""
+        "".join(
+            [
+                "QMessageBox { background: palette(window); }",
+                "QLabel { color: palette(window-text); }",
+                estilo_botoes(),
+            ]
+        )
     )
 
 
@@ -98,7 +148,7 @@ def style_buttons(
     """Aplica estilo consistente a uma lista de botões."""
     if not buttons:
         return
-    
+
     for b in buttons:
         if b is None:
             continue
@@ -118,11 +168,29 @@ def style_task_input(
     """Aplica altura e fonte ao campo de entrada."""
     if inp is None:
         return
-    
+
     inp.setFixedHeight(height)
     f = inp.font() or QFont()
     f.setPointSize(font_pt)
     inp.setFont(f)
+
+    inp.setStyleSheet(
+        f"""
+        QLineEdit {{
+            background-color: {COLOR_INPUT_BG};
+            color: {COLOR_TEXT};
+            border: 1px solid {COLOR_INPUT_BORDER};
+            border-radius: 10px;
+            padding: 10px 12px;
+        }}
+        QLineEdit:focus {{
+            border: 1px solid {COLOR_ACCENT};
+        }}
+        QLineEdit::placeholder {{
+            color: {COLOR_TEXT_DISABLED};
+        }}
+        """
+    )
 
 
 # === Estilo da lista de tarefas ===
@@ -130,12 +198,12 @@ def style_task_list(
     lst: QListWidget | None,
     font_pt: int = 13,
     item_height: int = 36,
-    bg_color: str = "#ffffff",
+    bg_color: str = "#f8fafc",
 ):
     """Aplica estilo visual à lista de tarefas."""
     if lst is None:
         return
-    
+
     f = lst.font() or QFont()
     f.setPointSize(font_pt)
     lst.setFont(f)
@@ -152,18 +220,28 @@ def style_task_list(
     lst.setStyleSheet(
         f"""
         QListWidget {{
-            padding: 6px;
+            padding: 8px;
             background: {bg_color};
+            border: 1px solid {COLOR_LIST_BORDER};
+            border-radius: 12px;
             outline: none;
         }}
         QListWidget::item {{
-            padding: 8px 6px;
+            padding: 10px 10px;
             height: {item_height}px;
             color: black;
+            border-radius: 10px;
+            margin: 4px 0px;
+        }}
+        QListWidget::item:hover {{
+            background: {COLOR_ACCENT_SOFT_HOVER};
         }}
         QListWidget::item:selected {{
-            background: palette(mid);
+            background: {COLOR_ACCENT_SOFT_SELECTED};
             color: black;
+        }}
+        QListWidget::item:selected:active {{
+            background: {COLOR_ACCENT_SOFT_ACTIVE};
         }}
         QListWidget::item:focus {{
             outline: none;

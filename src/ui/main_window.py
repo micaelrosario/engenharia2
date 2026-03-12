@@ -66,17 +66,34 @@ class AplicativoTarefas(QWidget):
         layout_input = QHBoxLayout()
         layout_acoes = QHBoxLayout()
 
+        layout_principal.setContentsMargins(16, 16, 16, 16)
+        layout_principal.setSpacing(12)
+        layout_input.setSpacing(10)
+        layout_acoes.setSpacing(10)
+
         self.campo_tarefa = QLineEdit()
         self.campo_tarefa.setPlaceholderText("Digite uma nova tarefa...")
+        self.campo_tarefa.setClearButtonEnabled(True)
+        self.campo_tarefa.setToolTip(
+            "Digite a tarefa e pressione Enter para adicionar."
+        )
         style_task_input(self.campo_tarefa)
 
         self.botao_adicionar = QPushButton("Adicionar")
         self.botao_desfazer = QPushButton("Desfazer")
         self.botao_remover = QPushButton("Remover")
+
+        # Destaca a ação principal com o tema azul.
+        self.botao_adicionar.setProperty("variant", "primary")
+
+        self.botao_adicionar.setToolTip("Adicionar tarefa (Enter)")
+        self.botao_desfazer.setToolTip("Desfazer última remoção (Ctrl+Z)")
+        self.botao_remover.setToolTip("Remover tarefas selecionadas")
         style_buttons([self.botao_adicionar, self.botao_desfazer, self.botao_remover])
 
         self.lista_tarefas = QListWidget()
         self.lista_tarefas.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.lista_tarefas.setToolTip("Duplo clique: marcar/desmarcar como concluída.")
         style_task_list(self.lista_tarefas)
 
         layout_input.addWidget(self.campo_tarefa)
