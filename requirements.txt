@@ -3,3 +3,4 @@ PyQt5-stubs
 pytest
 pytest-qt
 ruff
+sonarscanner
